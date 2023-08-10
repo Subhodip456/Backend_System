@@ -5,8 +5,11 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean');
 
-app.use(cors());
+
 
 dotenv.config({path:'config.env'});
 const uri = process.env.MONGODB_URI;
@@ -22,6 +25,7 @@ app.use(morgan('tiny'));
 app.use(mongoSanitize());
 app.use(helmet());
 app.use(xss());
+app.use(cors());
 
 mongoose.connect(uri,{useNewUrlParser:true,useUnifiedTopology: true});
 
