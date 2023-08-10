@@ -3,6 +3,5 @@ const controller = require("../controller/controller");
 const authenticateUser = require("../middleware/authUser");
 
 
-route.post('/data',authenticateUser,controller.storeData);
-
+route.delete('/data/:key',authenticateUser,controller.deleteData);
 module.exports = route;

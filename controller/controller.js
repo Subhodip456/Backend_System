@@ -1,12 +1,12 @@
-const db = require("../model/db")
-const jwt = require('jsonwebtoken')
+const db = require("../model/db");
+const store_data_model= require("../model/store-data-model");
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const dotenv = require("dotenv");
 
-const generateJwtSecret = () => {
-  return crypto.randomBytes(64).toString('hex');
-};
+dotenv.config({path:'config.env'});
+const jwtSecret = process.env.ACCESS_TOKEN_SECRET;
 
-const jwtSecret = generateJwtSecret();
 
 exports.createUser = async(req,res,next) => {
 	try {
@@ -130,32 +130,127 @@ exports.storeData = async (req,res,next) => {
       });
     }
 	
-	// Find the user in the database
-    const user = await db.findById(req.user.username);
-	console.log("user.data =",user.data);
-	
-    // Check if the key already exists
-    if (user.data[key]) {
-      return res.status(400).json({
+	//Check if provided key is valid or Missing
+	if (!key) {
+		return res.status(400).json({
         status: 'error',
-        code: 'KEY_EXISTS',
-        message: 'The provided key already exists in the database. To update an existing key, use the update API.',
+        code: 'INVALID_KEY',
+        message: 'The provided key is not valid or missing.',
       });
     }
-
-    // Store the key-value pair in the database
-    user.data[key] = value;
-    await user.save();
+	
+	//Check if provided value is valid or Missing
+	if (!value) {
+		return res.status(400).json({
+        status: 'error',
+        code: 'INVALID_VALUE',
+        message: 'The provided value is not valid or missing.',
+      });
+    }
+	
+	// Find the key in the database
+    const user = await store_data_model.findOne({key});
+	console.log("user =",user);
+	
+	// Store the key-value pair in the database if does'nt exists
+    if (!user) {
+    const newUser = new store_data_model({key,value});
+    await newUser.save();
 
     return res.status(200).json({
       status: 'success',
       message: 'Data stored successfully.',
     });
-		
+    }
+	// Check if the key already exists
+	else{
+	return res.status(400).json({
+        status: 'error',
+        code: 'KEY_EXISTS',
+        message: 'The provided key already exists in the database. To update an existing key, use the update API.',
+      });
+	}
 	 }
 	catch(err){
 		next(err);
 	}
 }
 
-module.exports = jwtSecret
+exports.retrieveData = async(req,res,next) => {
+	try{
+		const fetchKey = req.params.key;
+		const data = await store_data_model.find({key:fetchKey});
+		if(!data[0].key){
+		return res.status(400).json({
+			status:'error',
+			code:'KEY_NOT_FOUND',
+			message:'The provided key does not exist in the database.',
+		})
+		}
+		else{
+		return res.status(200).json({
+		  "status": "success",
+		  "data": {
+			"key": data[0].key,
+			"value":data[0].value
+		  }
+		});
+		}
+	}
+	catch(err){
+		next(err);
+	}
+}
+
+
+exports.updateData = async(req,res,next) => {
+	try{
+		const fetchKey = req.params.key;
+		const data = await store_data_model.findOneAndUpdate({key:fetchKey},{
+			$set:{
+			   value:req.body.value
+			}
+		},{new:true});
+		console.log("data",data)
+		if(!data.key){
+		return res.status(400).json({
+			status:'error',
+			code:'KEY_NOT_FOUND',
+			message:'The provided key does not exist in the database.',
+		})
+		}
+		else{
+		return res.status(200).json({
+		  "status": "success",
+		  "message": "Data updated successfully."
+		});
+		}
+	}
+	catch(err){
+		next(err);
+	}
+}
+
+exports.deleteData = async(req,res,next) => {
+	try{
+		const fetchKey = req.params.key;
+		const data = await store_data_model.deleteOne({key:fetchKey});
+		console.log("data",data)
+		if(data.acknowledged==false){
+		return res.status(400).json({
+			status:'error',
+			code:'KEY_NOT_FOUND',
+			message:'The provided key does not exist in the database.',
+		})
+		}
+		else{
+		return res.status(200).json({
+		  "status": "success",
+		  "message": "Data deleted successfully."
+		});
+		}
+	}
+	catch(err){
+		next(err);
+	}
+}

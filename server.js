@@ -28,10 +28,16 @@ connection.once('open',()=>{
 const register_page = require("./routes/register");
 const tokens= require("./routes/tokens");
 const store_data=require("./routes/store_data");
+const retrieve_data=require("./routes/retrieve_data");
+const update_data=require("./routes/update_data");
+const delete_data=require("./routes/delete_data");
 
 app.use('/api',register_page);
 app.use('/api',tokens);
 app.use('/api',store_data);
+app.use('/api',retrieve_data);
+app.use('/api',update_data);
+app.use('/api',delete_data);
 
 app.listen(port,()=>{
     console.log(`Server is running on http://localhost:${port}`)

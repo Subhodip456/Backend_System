@@ -11,7 +11,7 @@ def test_register_user():
     data = {
         "username": user_name,
         "email": "{0}@example.com".format(user_name),
-        "password": "test_password",
+        "password": "test_password1",
         "full_name": "Test User",
         "age": 30,
         "gender": "male"
@@ -25,7 +25,7 @@ def test_generate_token():
     endpoint = "/api/token"
     data = {
         "username": user_name,
-        "password": "test_password"
+        "password": "test_password1"
     }
     response = requests.post(url + endpoint, json=data)
     print("response", response.request.url, response.request.method, response.status_code, response.text)
