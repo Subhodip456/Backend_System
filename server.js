@@ -18,6 +18,11 @@ app.use(express.json());
 
 app.use(morgan('tiny'));
 
+//security
+app.use(mongoSanitize());
+app.use(helmet());
+app.use(xss());
+
 mongoose.connect(uri,{useNewUrlParser:true,useUnifiedTopology: true});
 
 const connection = mongoose.connection;
