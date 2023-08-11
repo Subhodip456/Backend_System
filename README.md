@@ -1,5 +1,5 @@
 # Backend_System
-A Rest API with full back-end architecture for authenticating a user.It uses jwt tokens to authenticate the user. Each API calls are tested (with POSTMAN) and as well as with the provided python script every possible error handled with proper JSON response for each error.
+A Rest API with full back-end architecture for authenticating a user.It uses jwt tokens to authenticate the user. Each API calls are tested (with POSTMAN) and as well as with the provided python script every possible error handled with proper JSON response for each error.The application is deployed using docker services build using Github Actions
 
 # Your choices of framework 
 I have used Node js for creating the api and used mongo db for the database schema.
